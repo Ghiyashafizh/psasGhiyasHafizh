@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Outlet;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
 
 class OutletController extends Controller
 {
@@ -12,8 +13,9 @@ class OutletController extends Controller
      */
     public function index()
     {
-        $outlets = Outlet::latest()->paginate(10);
-        return view('outlets.index' , compact('outlets'));
+        $outlets = Outlet::oldest()->paginate(5);
+
+        return view('outlets.index', compact('outlets'));
     }
 
     /**
@@ -21,7 +23,7 @@ class OutletController extends Controller
      */
     public function create()
     {
-        //
+         return view('outlets.create');
     }
 
     /**
@@ -29,23 +31,35 @@ class OutletController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'code' => 'required|max:5',
+            'name' => 'required|max:20', 
+            'status' => 'required|in:berlangsung, selesai', 
+            'address' => 'required|max:50', 
+            'phone' => 'required|numeric|min:15', 
+        ]);
+
+        Outlet::create([
+            'code' => $request->code,
+            'name'     => $request->name,
+            'status'   => $request->status,
+            'address'   => $request->address,
+            'phone'   => $request->phone
+        ]);
+
+        //redirect to index
+        return redirect()->route('outlets.index');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
 
     /**
      * Show the form for editing the specified resource.
      */
     public function edit(string $id)
     {
-        //
+        $outlets = Outlet::find($id);
+
+        return view('outlets.edit', compact('outlets'));
     }
 
     /**
@@ -53,7 +67,26 @@ class OutletController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $request->validate([
+            'code' => 'required|max:5',
+            'name' => 'required|max:20', 
+            'status' => 'required|in:berlangsung, selesai', 
+            'address' => 'required|max:50', 
+            'phone' => 'required|numeric|min:15', 
+        ]);
+
+        $outlets = Outlet::find($id);
+
+        $outlets->update([
+            'code' => $request->code,
+            'name'     => $request->name,
+            'status'   => $request->status,
+            'address'   => $request->address,
+            'phone'   => $request->phone
+        ]);
+
+        //redirect to index
+        return redirect()->route('outlets.index');
     }
 
     /**
@@ -61,6 +94,10 @@ class OutletController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $outlets = Outlet::find($id);
+        $outlets->delete();
+
+        //redirect to index
+        return redirect()->route('outlets.index');
     }
 }
